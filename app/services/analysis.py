@@ -23,6 +23,9 @@ class StepAnalyzer:
     def analyze(self, step_text: str, expected_step_text: str | None = None) -> AnalysisOutput:
         normalized = self._normalize(step_text)
 
+        if expected_step_text and normalized == self._normalize(expected_step_text):
+            return AnalysisOutput(True, None, None, 0.98)
+
         if expected_step_text:
             expected = self._normalize(expected_step_text)
             if normalized == expected:
@@ -36,6 +39,8 @@ class StepAnalyzer:
         if "=" not in step_text:
             return AnalysisOutput(False, "incomplete_step", "equation_structure", 0.8)
         if "x=" in normalized and any(tok in normalized for tok in ["+", "-", "*", "/"]):
+            return AnalysisOutput(False, "premature_final", "multi_step_solving", 0.74)
+
             # likely intermediate step claimed as final answer
             return AnalysisOutput(False, "premature_final", "multi_step_solving", 0.74)
 
